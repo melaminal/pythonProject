@@ -10,9 +10,18 @@ getcontext().prec = 17
 
 # Определи числа
 c = Decimal('7.8768051660900680')
+part = Decimal('1.1')
+a = Decimal('3.89040561515818162')
+apl = Decimal('0.99')
+amn = Decimal('1.01')
 
 # Умножение
-c_new = c * 1.0025
+c_new = c * part
+a_start = a * apl
+a_stop = a * amn
 
 # Вывод результата
 print(c_new)
+# print(a_start)
+# print(a)
+# print(a_stop)
