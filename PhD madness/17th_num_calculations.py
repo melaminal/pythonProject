@@ -3,25 +3,16 @@ from decimal import Decimal, getcontext
 # Установить точность до 17 знаков
 getcontext().prec = 17
 
-# global a, c
-# a_glb = 3.9384077373331965
-# b_glb = -3.9384077373331965
-# c_glb = 7.8768051660900680
+# for FM state global a, c
+# a_glb = 3.9394478321811017
+# b_glb = -3.9394478321811017
+# c_glb = 7.8788956643622034
 
 # Определи числа
-c = Decimal('7.8768051660900680')
-part = Decimal('1.1')
-a = Decimal('3.89040561515818162')
-apl = Decimal('0.99')
-amn = Decimal('1.01')
+a = Decimal('3.8896580000380268')
 
 # Умножение
-c_new = c * part
-a_start = a * apl
-a_stop = a * amn
+c = a * Decimal('2')
 
 # Вывод результата
-print(c_new)
-# print(a_start)
-# print(a)
-# print(a_stop)
+print(c)
