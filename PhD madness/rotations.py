@@ -2,6 +2,18 @@ from pymatgen.core import Lattice, Structure
 import numpy as np
 from pymatgen.io.vasp import Poscar
 
+# Список возможных видов поворотов (Glazer notation)
+Glazer_list = [
+    "a0a0a0", "a0a0c+", "a0b+b+", "a+a+a+", "a+b+c+",
+    "a0a0c-", "a0b-b-", "a-a-a-", "a0b-c-", "a-b-b-",
+    "a-b-c-", "a0b+c-", "a+b-b-", "a+b-c-", "a+a+c-"
+]
+correct_space_group_numbers = [
+    221, 127, 139, 204, 71,
+    140, 74, 167, 12, 15,
+    2, 63, 62, 11, 137
+]
+
 # Определяем параметры решётки (в ангстремах)
 a = 3.905
 lattice = Lattice.from_parameters(a, a, a, 90, 90, 90)  # Кубическая решётка
@@ -19,130 +31,78 @@ coords = [
 # Создаём структуру
 EuTiO3_structure = Structure(lattice, species, coords)
 
-# Функция для создания суперячейки с учетом Glazer notation
-def create_supercell_with_glazer(structure, glazer_notation):
+# Функция для определения атомов кислорода, которые должны быть сдвинуты
+
+def get_target_oxygen_atoms(structure, axis):
     """
-    Создает суперячейку 2x2x2 с вращениями октаэдров в соответствии с Glazer notation.
-
-    Parameters:
-    structure: Structure
-        Исходная структура.
-    glazer_notation: str
-        Glazer notation, например, "a+a+c-" или "a0a0c-".
-
-    Returns:
-    Structure
-        Структура с примененными вращениями и смещениями.
+    Возвращает список атомов кислорода, которые находятся в той же плоскости,
+    что и атом Ti, вдоль указанной оси.
     """
-    # Создаем суперячейку 2x2x2
-    supercell = structure.copy()
-    supercell.make_supercell([2, 2, 2])
+    target_atoms = []
 
-    # Разбираем Glazer notation
-    axes = ['x', 'y', 'z']
-    directions = [glazer_notation[0], glazer_notation[2], glazer_notation[4]]  # a, b, c
-    signs = [glazer_notation[1], glazer_notation[3], glazer_notation[5]]  # +, -, 0
+    # Находим координаты Ti
+    ti_coords = None
+    for site in structure:
+        if site.species_string == "Ti":
+            ti_coords = site.frac_coords
+            break
 
-    # Применяем вращения и смещения для каждой оси
-    for axis, direction, sign in zip(axes, directions, signs):
-        if sign == '0':
-            continue  # Пропускаем ось без вращения
-        apply_layered_rotation_with_displacement(supercell, axis, sign)
+    if ti_coords is None:
+        raise ValueError("Атом Ti не найден в структуре.")
 
-    return supercell
-
-
-def apply_layered_rotation_with_displacement(structure, axis, sign):
-    """
-    Применяет вращение октаэдров и смещение атомов кислорода слоями вдоль заданной оси.
-
-    Parameters:
-    structure: Structure
-        Структура, к которой применяется вращение.
-    axis: str
-        Ось вращения ('x', 'y', 'z').
-    sign: str
-        Направление вращения ('+' или '-').
-    """
-    angle_deg = 2  # Угол вращения в градусах
-    angle_rad = np.radians(angle_deg)
-
-    # Индекс оси (0 для x, 1 для y, 2 для z)
-    axis_index = {'x': 0, 'y': 1, 'z': 2}[axis]
-
-    # Находим координаты атомов Ti (центры вращения)
-    titanium_sites = [site for site in structure if site.species_string == "Ti"]
-
-    # Находим все атомы кислорода
-    oxygen_sites = [site for site in structure if site.species_string == "O"]
-
-    # Применяем вращение к каждому слою
-    for ti_site in titanium_sites:
-        ti_cart_coords = structure.lattice.get_cartesian_coords(ti_site.frac_coords)
-
-        # Применяем вращение и смещение к атомам кислорода в той же плоскости
-        for site in oxygen_sites:
+    # Определяем, какие атомы кислорода находятся в той же плоскости
+    for i, site in enumerate(structure):
+        if site.species_string == "O":
             o_coords = site.frac_coords
-            if not np.isclose(o_coords[axis_index], ti_site.frac_coords[axis_index]):
-                continue  # Пропускаем атомы, которые не совпадают по координате оси
+            if axis == 'z' and np.isclose(o_coords[2], ti_coords[2]):
+                target_atoms.append(i)
 
-            # Чередуем направление вращения для разных слоев
-            layer_index = np.round(ti_site.frac_coords[axis_index] * 2) % 2  # 0 или 1
-            direction = 1 if sign == '+' else (-1 if layer_index == 1 else 1)
-            adjusted_angle_rad = direction * angle_rad
+    return target_atoms
 
-            # Матрица вращения для текущего слоя
-            rotation_matrix = {
-                'x': np.array([
-                    [1, 0, 0],
-                    [0, np.cos(adjusted_angle_rad), -np.sin(adjusted_angle_rad)],
-                    [0, np.sin(adjusted_angle_rad), np.cos(adjusted_angle_rad)]
-                ]),
-                'y': np.array([
-                    [np.cos(adjusted_angle_rad), 0, np.sin(adjusted_angle_rad)],
-                    [0, 1, 0],
-                    [-np.sin(adjusted_angle_rad), 0, np.cos(adjusted_angle_rad)]
-                ]),
-                'z': np.array([
-                    [np.cos(adjusted_angle_rad), -np.sin(adjusted_angle_rad), 0],
-                    [np.sin(adjusted_angle_rad), np.cos(adjusted_angle_rad), 0],
-                    [0, 0, 1]
-                ])
-            }[axis]
+# Функция для вращения кислородных атомов вдоль заданной оси на определённый угол
 
-            # Вращаем атом кислорода
-            o_cart_coords = structure.lattice.get_cartesian_coords(o_coords)
-            relative_vector = o_cart_coords - ti_cart_coords
-            rotated_vector = np.dot(rotation_matrix, relative_vector)
-            new_cart_coords = ti_cart_coords + rotated_vector
+def rotate_oxygen_atoms(structure, angle_deg):
+    """
+    Вращает атомы кислорода в плоскости XY на заданный угол.
+    Для одного атома угол задаётся через смещение вдоль X, для другого — вдоль Y.
+    Угол задаётся в градусах.
+    """
+    new_structure = structure.copy()  # Копируем структуру для модификаций
+    target_atoms = get_target_oxygen_atoms(new_structure, 'z')  # Получаем целевые атомы
 
-            # Корректируем координаты, чтобы оставлять ненужные оси неизменными
-            if axis == 'z':  # Вращение в плоскости xy
-                new_cart_coords[2] = o_cart_coords[2]  # Оставляем z-координату неизменной
-            elif axis == 'x':  # Вращение в плоскости yz
-                new_cart_coords[0] = o_cart_coords[0]  # Оставляем x-координату неизменной
-            elif axis == 'y':  # Вращение в плоскости xz
-                new_cart_coords[1] = o_cart_coords[1]  # Оставляем y-координату неизменной
+    angle_rad = np.radians(angle_deg)  # Преобразуем угол в радианы
 
-            # Добавляем смещение по оси, где необходимо
-            displacement = np.zeros(3)
-            if axis == 'z':  # Смещение в плоскости xy
-                if layer_index == 0:
-                    displacement[0] = 0.01 * direction  # Смещение по x
-                else:
-                    displacement[1] = 0.01 * direction  # Смещение по y
+    # Проверяем, что количество атомов кислорода в плоскости >= 2
+    if len(target_atoms) < 2:
+        raise ValueError("Недостаточно атомов кислорода для выполнения вращения.")
 
-            new_cart_coords += displacement
-            site.frac_coords = np.mod(
-                structure.lattice.get_fractional_coords(new_cart_coords), 1
-            )
+    # Первый атом (O1) смещается вдоль Y
+    site1 = new_structure[target_atoms[0]]
+    cart_coords1 = new_structure.lattice.get_cartesian_coords(site1.frac_coords)
+    cart_coords1[1] -= np.sin(angle_rad)  # Смещение по Y
+    site1.frac_coords = new_structure.lattice.get_fractional_coords(cart_coords1)
 
+    # Второй атом (O2) смещается вдоль X
+    site2 = new_structure[target_atoms[1]]
+    cart_coords2 = new_structure.lattice.get_cartesian_coords(site2.frac_coords)
+    cart_coords2[0] += np.sin(angle_rad)  # Смещение по X
+    site2.frac_coords = new_structure.lattice.get_fractional_coords(cart_coords2)
 
-# Пример использования
-glazer_notation = "a0a0c-"
-supercell = create_supercell_with_glazer(EuTiO3_structure, glazer_notation)
-output_file = "POSCAR_supercell_glazer.vasp"
+    return new_structure
+
+# Параметры вращения
+angle_deg = 10  # Угол поворота в градусах
+
+# Вращаем структуру
+rotated_structure = rotate_oxygen_atoms(EuTiO3_structure, angle_deg)
+
+# Печатаем повернутую структуру
+print("Повернутая структура EuTiO3:")
+print(rotated_structure)
+
+# Экспортируем повернутую структуру в файл POSCAR с указанием кодировки
+output_file = "POSCAR_EuTiO3_rotated"
 with open(output_file, "w", encoding="utf-8") as f:
-    poscar = Poscar(supercell)
+    poscar = Poscar(rotated_structure)
     f.write(poscar.get_string())
-print(f"Суперячейка с Glazer notation '{glazer_notation}' сохранена в файл {output_file}")
+print(f"Повернутая структура сохранена в файл {output_file}")
