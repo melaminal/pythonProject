@@ -23,51 +23,65 @@ EuTiO3_structure = Structure(lattice, species, coords)
 # Функция для поворота кислородных атомов вокруг заданной оси
 def rotate_oxygen_atoms(structure, axis, angle_deg):
     """
-    Вращает атомы кислорода вокруг заданной оси на заданный угол.
-    Все атомы вращаются в одну сторону относительно центра (атома Ti).
+    Вращает атомы кислорода вокруг указанной оси на заданный угол,
+    сохраняя согласованное вращение в одной плоскости.
     """
     angle_rad = np.radians(angle_deg)  # Угол в радианах
 
-    # Определяем матрицу вращения для заданной оси
-    rotation_matrix = {
-        'x': np.array([[1, 0, 0], [0, np.cos(angle_rad), -np.sin(angle_rad)], [0, np.sin(angle_rad), np.cos(angle_rad)]]),
-        'y': np.array([[np.cos(angle_rad), 0, np.sin(angle_rad)], [0, 1, 0], [-np.sin(angle_rad), 0, np.cos(angle_rad)]]),
-        'z': np.array([[np.cos(angle_rad), -np.sin(angle_rad), 0], [np.sin(angle_rad), np.cos(angle_rad), 0], [0, 0, 1]])
-    }[axis]
+    # Матрицы вращения для всех осей
+    rotation_matrices = {
+        'x': np.array([
+            [1, 0, 0],
+            [0, np.cos(angle_rad), -np.sin(angle_rad)],
+            [0, np.sin(angle_rad), np.cos(angle_rad)]
+        ]),
+        'y': np.array([
+            [np.cos(angle_rad), 0, np.sin(angle_rad)],
+            [0, 1, 0],
+            [-np.sin(angle_rad), 0, np.cos(angle_rad)]
+        ]),
+        'z': np.array([
+            [np.cos(angle_rad), -np.sin(angle_rad), 0],
+            [np.sin(angle_rad), np.cos(angle_rad), 0],
+            [0, 0, 1]
+        ])
+    }
 
-    new_structure = structure.copy()  # Копируем структуру
+    rotation_matrix = rotation_matrices.get(axis)
+    if rotation_matrix is None:
+        raise ValueError("Некорректная ось вращения. Используйте 'x', 'y' или 'z'.")
 
-    # Находим центр вращения (атом Ti)
-    ti_coords = None
-    for site in new_structure:
-        if site.species_string == "Ti":
-            ti_coords = site.frac_coords
-            ti_cart_coords = new_structure.lattice.get_cartesian_coords(ti_coords)
-            break
+    new_structure = structure.copy()
 
-    if ti_coords is None:
+    # Находим атом Ti (центр вращения)
+    ti_site = next((site for site in new_structure if site.species_string == "Ti"), None)
+    if ti_site is None:
         raise ValueError("Атом Ti не найден в структуре.")
+
+    ti_cart_coords = new_structure.lattice.get_cartesian_coords(ti_site.frac_coords)
 
     # Вращаем только атомы кислорода
     for site in new_structure:
         if site.species_string == "O":
-            o_coords = site.frac_coords
-            o_cart_coords = new_structure.lattice.get_cartesian_coords(o_coords)
+            o_cart_coords = new_structure.lattice.get_cartesian_coords(site.frac_coords)
 
-            # Вектор от Ti к кислороду
+            # Пропускаем атомы, не находящиеся в плоскости вращения
+            if axis == 'z' and not np.isclose(site.frac_coords[2], ti_site.frac_coords[2]):
+                continue
+            elif axis == 'x' and not np.isclose(site.frac_coords[0], ti_site.frac_coords[0]):
+                continue
+            elif axis == 'y' and not np.isclose(site.frac_coords[1], ti_site.frac_coords[1]):
+                continue
+
+            # Вращаем вектор относительно центра
             relative_vector = o_cart_coords - ti_cart_coords
-
-            # Поворачиваем вектор в одну сторону
             rotated_vector = np.dot(rotation_matrix, relative_vector)
-
-            # Новые декартовые координаты кислорода
             new_cart_coords = ti_cart_coords + rotated_vector
 
-            # Конвертируем обратно в дробные координаты
-            new_frac_coords = new_structure.lattice.get_fractional_coords(new_cart_coords)
-
-            # Обновляем координаты атома
-            site.frac_coords = new_frac_coords
+            # Обновляем положение атома
+            site.frac_coords = np.mod(
+                new_structure.lattice.get_fractional_coords(new_cart_coords), 1
+            )
 
     return new_structure
 
