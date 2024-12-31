@@ -1,4 +1,4 @@
-from pymatgen.core import Lattice, Structure
+from pymatgen.core import Lattice, Structure, PeriodicSite
 import numpy as np
 from pymatgen.io.vasp import Poscar
 
@@ -31,77 +31,59 @@ coords = [
 # Создаём структуру
 EuTiO3_structure = Structure(lattice, species, coords)
 
-# Функция для определения атомов кислорода, которые должны быть сдвинуты
-
-def get_target_oxygen_atoms(structure, axis):
-    """
-    Возвращает список атомов кислорода, которые находятся в той же плоскости,
-    что и атом Ti, вдоль указанной оси.
-    """
-    target_atoms = []
-
-    # Находим координаты Ti
-    ti_coords = None
-    for site in structure:
-        if site.species_string == "Ti":
-            ti_coords = site.frac_coords
-            break
-
-    if ti_coords is None:
-        raise ValueError("Атом Ti не найден в структуре.")
-
-    # Определяем, какие атомы кислорода находятся в той же плоскости
-    for i, site in enumerate(structure):
-        if site.species_string == "O":
-            o_coords = site.frac_coords
-            if axis == 'z' and np.isclose(o_coords[2], ti_coords[2]):
-                target_atoms.append(i)
-
-    return target_atoms
-
 # Функция для вращения кислородных атомов вдоль заданной оси на определённый угол
 
-def rotate_oxygen_atoms(structure, angle_deg):
+def rotate_oxygen_atoms_supercell(structure, angle_deg, supercell_dim):
     """
     Вращает атомы кислорода в плоскости XY на заданный угол.
-    Для одного атома угол задаётся через смещение вдоль X, для другого — вдоль Y.
-    Угол задаётся в градусах.
+    Учитывает поворот в противоположную сторону для соседних ячеек.
     """
-    new_structure = structure.copy()  # Копируем структуру для модификаций
-    target_atoms = get_target_oxygen_atoms(new_structure, 'z')  # Получаем целевые атомы
-
     angle_rad = np.radians(angle_deg)  # Преобразуем угол в радианы
 
-    # Проверяем, что количество атомов кислорода в плоскости >= 2
-    if len(target_atoms) < 2:
-        raise ValueError("Недостаточно атомов кислорода для выполнения вращения.")
+    new_sites = []  # Список новых сайтов для структуры
 
-    # Первый атом (O1) смещается вдоль Y
-    site1 = new_structure[target_atoms[0]]
-    cart_coords1 = new_structure.lattice.get_cartesian_coords(site1.frac_coords)
-    cart_coords1[1] -= np.sin(angle_rad)  # Смещение по Y
-    site1.frac_coords = new_structure.lattice.get_fractional_coords(cart_coords1)
+    for site in structure.sites:
+        if site.species_string == "O":
+            frac_coords = site.frac_coords.copy()
 
-    # Второй атом (O2) смещается вдоль X
-    site2 = new_structure[target_atoms[1]]
-    cart_coords2 = new_structure.lattice.get_cartesian_coords(site2.frac_coords)
-    cart_coords2[0] += np.sin(angle_rad)  # Смещение по X
-    site2.frac_coords = new_structure.lattice.get_fractional_coords(cart_coords2)
+            # Определяем четность или нечетность позиции ячейки
+            cell_x = int(frac_coords[0] // 1)  # Индекс ячейки по X
+            cell_y = int(frac_coords[1] // 1)  # Индекс ячейки по Y
 
-    return new_structure
+            # Меняем направление вращения в шахматном порядке
+            sign = 1 if (cell_x + cell_y) % 2 == 0 else -1
+
+            # Оригинальная ячейка и соседние ячейки
+            if abs(frac_coords[0] % 1) < 1e-6 and abs(frac_coords[1] % 1 - 0.5) < 1e-6:
+                frac_coords[1] -= sign * np.sin(angle_rad)  # Смещение вдоль Y
+            elif abs(frac_coords[0] % 1 - 0.5) < 1e-6 and abs(frac_coords[1] % 1) < 1e-6:
+                frac_coords[0] += sign * np.sin(angle_rad)  # Смещение вдоль X
+
+            new_sites.append(PeriodicSite(site.species, frac_coords, structure.lattice))
+        else:
+            new_sites.append(site)
+
+    # Создаём новую структуру с обновлёнными сайтами
+    modified_structure = Structure.from_sites(new_sites)
+
+    # Создаём суперячейку на основе модифицированной структуры
+    modified_structure.make_supercell(supercell_dim)
+
+    return modified_structure
 
 # Параметры вращения
 angle_deg = 10  # Угол поворота в градусах
+supercell_dim = [2, 2, 1]  # Размер суперячейки
 
 # Вращаем структуру
-rotated_structure = rotate_oxygen_atoms(EuTiO3_structure, angle_deg)
+rotated_structure = rotate_oxygen_atoms_supercell(EuTiO3_structure, angle_deg, supercell_dim)
 
 # Печатаем повернутую структуру
 print("Повернутая структура EuTiO3:")
 print(rotated_structure)
 
 # Экспортируем повернутую структуру в файл POSCAR с указанием кодировки
-output_file = "POSCAR_EuTiO3_rotated"
+output_file = "POSCAR_EuTiO3_rotated_supercell"
 with open(output_file, "w", encoding="utf-8") as f:
     poscar = Poscar(rotated_structure)
     f.write(poscar.get_string())
