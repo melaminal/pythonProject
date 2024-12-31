@@ -72,7 +72,7 @@ def rotate_oxygen_atoms_supercell(structure, angle_deg, supercell_dim):
     return modified_structure
 
 # Параметры вращения
-angle_deg = 10  # Угол поворота в градусах
+angle_deg = 5  # Угол поворота в градусах
 supercell_dim = [2, 2, 1]  # Размер суперячейки
 
 # Вращаем структуру
