@@ -116,7 +116,15 @@ def apply_layered_rotation_with_displacement(structure, axis, sign):
             rotated_vector = np.dot(rotation_matrix, relative_vector)
             new_cart_coords = ti_cart_coords + rotated_vector
 
-            # Добавляем смещение по осям x и y в зависимости от слоя
+            # Корректируем координаты, чтобы оставлять ненужные оси неизменными
+            if axis == 'z':  # Вращение в плоскости xy
+                new_cart_coords[2] = o_cart_coords[2]  # Оставляем z-координату неизменной
+            elif axis == 'x':  # Вращение в плоскости yz
+                new_cart_coords[0] = o_cart_coords[0]  # Оставляем x-координату неизменной
+            elif axis == 'y':  # Вращение в плоскости xz
+                new_cart_coords[1] = o_cart_coords[1]  # Оставляем y-координату неизменной
+
+            # Добавляем смещение по оси, где необходимо
             displacement = np.zeros(3)
             if axis == 'z':  # Смещение в плоскости xy
                 if layer_index == 0:
