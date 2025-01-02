@@ -31,8 +31,12 @@ coords = [
 # Создаём структуру
 EuTiO3_structure = Structure(lattice, species, coords)
 
-# Функция для определения четности ячейки атома титана
+# Функция для создания суперячейки 2x2x2
+def create_supercell(structure, dimensions):
+    structure.make_supercell(dimensions)
+    return structure
 
+# Функция для определения четности ячейки атома титана
 def is_even_cell(ti_site):
     """
     Определяет четность ячейки атома титана.
@@ -47,7 +51,6 @@ def is_even_cell(ti_site):
     return is_even
 
 # Функция для привязки кислородных атомов к титану
-
 def map_oxygen_to_titanium(structure):
     """
     Привязывает два кислородных атома к каждому атому титана.
@@ -81,12 +84,22 @@ def map_oxygen_to_titanium(structure):
 
 # Функция для вращения кислородных атомов
 
-def rotate_oxygen_atoms_in_supercell(structure, angle_deg, ti_to_o_map):
+def rotate_oxygen_atoms_in_supercell(structure, angle_deg, ti_to_o_map, glazer_type):
     """
-    Применяет вращение кислородных атомов на основе четности ячейки титана.
+    Применяет вращение кислородных атомов на основе четности ячейки титана и слоя z.
+    Если знак в Glazer notations для оси "+", оба слоя вращаются одинаково.
+    Если знак "-", во втором слое четные ячейки вращаются как нечетные в первом слое, и наоборот.
     """
+    if glazer_type == "a0a0a0":
+        # Если все оси имеют поворот 0, ничего не делаем
+        print("No rotation applied for Glazer notation: a0a0a0")
+        return structure
+
     angle_rad = np.radians(angle_deg)
     new_sites = []
+
+    # Проверяем знак оси "c" из Glazer notations
+    c_sign = glazer_type[-1] if glazer_type[-2] == 'c' else '+'
 
     for i, site in enumerate(structure.sites):
         frac_coords = site.frac_coords.copy()
@@ -96,6 +109,15 @@ def rotate_oxygen_atoms_in_supercell(structure, angle_deg, ti_to_o_map):
 
             # Определить четность ячейки атома титана
             is_even = is_even_cell(structure[parent_ti])
+
+            # Определить слой (нижний или верхний) по z
+            is_upper_layer = np.isclose(frac_coords[2], 0.75)
+
+            # Меняем направление вращения в верхнем слое только если знак "-"
+            if is_upper_layer and c_sign == '-':
+                is_even = not is_even
+
+            # Направление вращения
             sign = 1 if is_even else -1
 
             # Поворачиваем атом кислорода
@@ -110,7 +132,7 @@ def rotate_oxygen_atoms_in_supercell(structure, angle_deg, ti_to_o_map):
 
 # Параметры вращения
 angle_deg = 5
-supercell_dim = [2, 2, 1]
+supercell_dim = [2, 2, 2]  # Два слоя по z
 
 # Создаём суперячейку
 EuTiO3_structure.make_supercell(supercell_dim)
@@ -118,8 +140,9 @@ EuTiO3_structure.make_supercell(supercell_dim)
 # Создаём карту Ti-O
 ti_to_o_map = map_oxygen_to_titanium(EuTiO3_structure)
 
-# Поворачиваем кислородные атомы
-rotated_structure = rotate_oxygen_atoms_in_supercell(EuTiO3_structure, angle_deg, ti_to_o_map)
+# Поворачиваем кислородные атомы в соответствии с Glazer notations
+glazer_type = "a0a0a0"
+rotated_structure = rotate_oxygen_atoms_in_supercell(EuTiO3_structure, angle_deg, ti_to_o_map, glazer_type)
 
 # Печатаем повернутую суперячейку
 print("Повернутая суперячейка EuTiO3:")
