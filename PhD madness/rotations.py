@@ -31,60 +31,50 @@ coords = [
 # Создаём структуру
 EuTiO3_structure = Structure(lattice, species, coords)
 
-# Функция для вращения кислородных атомов вдоль заданной оси на определённый угол
+# Функция для вращения атомов кислорода в базовой ячейке
 
-def rotate_oxygen_atoms_supercell(structure, angle_deg, supercell_dim):
+def rotate_atoms_in_unit_cell(structure, angle_deg):
     """
-    Вращает атомы кислорода в плоскости XY на заданный угол.
-    Учитывает поворот в противоположную сторону для соседних ячеек.
+    Вращает атомы кислорода в базовой ячейке.
     """
     angle_rad = np.radians(angle_deg)  # Преобразуем угол в радианы
-
     new_sites = []  # Список новых сайтов для структуры
 
     for site in structure.sites:
+        frac_coords = site.frac_coords.copy()
         if site.species_string == "O":
-            frac_coords = site.frac_coords.copy()
+            # Применяем вращение для атомов кислорода
+            if np.isclose(frac_coords[0], 0.0, atol=1e-6) and np.isclose(frac_coords[1], 0.5, atol=1e-6):
+                frac_coords[1] -= np.sin(angle_rad)
+            elif np.isclose(frac_coords[0], 0.5, atol=1e-6) and np.isclose(frac_coords[1], 0.0, atol=1e-6):
+                frac_coords[0] += np.sin(angle_rad)
 
-            # Определяем четность или нечетность позиции ячейки
-            cell_x = int(frac_coords[0] // 1)  # Индекс ячейки по X
-            cell_y = int(frac_coords[1] // 1)  # Индекс ячейки по Y
+            # Печатаем координаты после вращения для проверки
+            print(f"Вращение в базовой ячейке, после вращения: {frac_coords}")
 
-            # Меняем направление вращения в шахматном порядке
-            sign = 1 if (cell_x + cell_y) % 2 == 0 else -1
-
-            # Оригинальная ячейка и соседние ячейки
-            if abs(frac_coords[0] % 1) < 1e-6 and abs(frac_coords[1] % 1 - 0.5) < 1e-6:
-                frac_coords[1] -= sign * np.sin(angle_rad)  # Смещение вдоль Y
-            elif abs(frac_coords[0] % 1 - 0.5) < 1e-6 and abs(frac_coords[1] % 1) < 1e-6:
-                frac_coords[0] += sign * np.sin(angle_rad)  # Смещение вдоль X
-
-            new_sites.append(PeriodicSite(site.species, frac_coords, structure.lattice))
-        else:
-            new_sites.append(site)
+        # Обновляем сайт
+        new_sites.append(PeriodicSite(site.species, frac_coords, structure.lattice))
 
     # Создаём новую структуру с обновлёнными сайтами
-    modified_structure = Structure.from_sites(new_sites)
-
-    # Создаём суперячейку на основе модифицированной структуры
-    modified_structure.make_supercell(supercell_dim)
-
-    return modified_structure
+    return Structure.from_sites(new_sites)
 
 # Параметры вращения
-angle_deg = 5  # Угол поворота в градусах
+angle_deg = 10  # Угол поворота в градусах
 supercell_dim = [2, 2, 1]  # Размер суперячейки
 
-# Вращаем структуру
-rotated_structure = rotate_oxygen_atoms_supercell(EuTiO3_structure, angle_deg, supercell_dim)
+# Вращаем базовую ячейку
+rotated_unit_cell = rotate_atoms_in_unit_cell(EuTiO3_structure, angle_deg)
 
-# Печатаем повернутую структуру
-print("Повернутая структура EuTiO3:")
-print(rotated_structure)
+# Создаём суперячейку из повернутой базовой ячейки
+rotated_unit_cell.make_supercell(supercell_dim)
 
-# Экспортируем повернутую структуру в файл POSCAR с указанием кодировки
-output_file = "POSCAR_EuTiO3_rotated_supercell"
+# Печатаем повернутую суперячейку
+print("Повернутая суперячейка EuTiO3:")
+print(rotated_unit_cell)
+
+# Экспортируем структуру в файл POSCAR с указанием кодировки
+output_file = "POSCAR_EuTiO3_supercell_rotated"
 with open(output_file, "w", encoding="utf-8") as f:
-    poscar = Poscar(rotated_structure)
+    poscar = Poscar(rotated_unit_cell)
     f.write(poscar.get_string())
-print(f"Повернутая структура сохранена в файл {output_file}")
+print(f"Суперячейка сохранена в файл {output_file}")
