@@ -1,6 +1,7 @@
 from pymatgen.core import Lattice, Structure, PeriodicSite
 import numpy as np
 from pymatgen.io.vasp import Poscar
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 # Список возможных видов поворотов (Glazer notation)
 Glazer_list = [
@@ -141,16 +142,20 @@ EuTiO3_structure.make_supercell(supercell_dim)
 ti_to_o_map = map_oxygen_to_titanium(EuTiO3_structure)
 
 # Поворачиваем кислородные атомы в соответствии с Glazer notations
-glazer_type = "a0a0a0"
+glazer_type = "a0a0c-"
 rotated_structure = rotate_oxygen_atoms_in_supercell(EuTiO3_structure, angle_deg, ti_to_o_map, glazer_type)
 
 # Печатаем повернутую суперячейку
 print("Повернутая суперячейка EuTiO3:")
 print(rotated_structure)
 
-# Экспортируем структуру в файл POSCAR
-output_file = "POSCAR_EuTiO3_supercell_rotated"
-with open(output_file, "w", encoding="utf-8") as f:
-    poscar = Poscar(rotated_structure)
-    f.write(poscar.get_string())
-print(f"Суперячейка сохранена в файл {output_file}")
+# Анализ симметрии
+symmetry_finder = SpacegroupAnalyzer(rotated_structure, symprec=1e-3)
+symmetrized_structure = symmetry_finder.get_refined_structure()
+
+# Экспорт компактной структуры в POSCAR
+output_file_compact = "POSCAR_EuTiO3_supercell_compact"
+with open(output_file_compact, "w", encoding="utf-8") as f:
+    poscar_compact = Poscar(symmetrized_structure)
+    f.write(poscar_compact.get_string())
+print(f"Компактная суперячейка сохранена в файл {output_file_compact}")

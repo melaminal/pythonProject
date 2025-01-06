@@ -9,7 +9,7 @@ getcontext().prec = 17
 # c_glb =
 
 # Определи числа
-a = Decimal('3.8897198333447203')
+a = Decimal('3.8894989172591279')
 
 # Умножение
 c_new = a * Decimal('2')
