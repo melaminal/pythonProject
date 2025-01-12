@@ -1,6 +1,5 @@
 from pymatgen.io.vasp import Poscar
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-
 # poscar = Poscar.from_file("/home/dieguez/Desktop/EuTiO3/Rotations/a0a0a0/POSCAR")
 poscar = Poscar.from_file("C:/Users/Maria/Desktop/POSCAR")
 structure = poscar.structure

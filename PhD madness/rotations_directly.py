@@ -22,7 +22,7 @@ EuTiO3_structure = Structure.from_str(file_content, fmt="poscar")
 def update_atom_positions(structure, glazer_type):
     new_sites = []
 
-    # Вращения для a0a0c+
+    # Вращения для a0a0c+ P4/mbm
     if glazer_type == "a0a0c+":
         predefined_coords = {
             14: [0.25000+0.1, 0.25000+0.1, 0.75000],
@@ -41,7 +41,7 @@ def update_atom_positions(structure, glazer_type):
             else:
                 new_sites.append(site)
 
-    # Вращения для a0a0c-
+    # Вращения для a0a0c- I4/mcm
     elif glazer_type == "a0a0c-":
         predefined_coords = {
             14: [0.25000+0.1, 0.25000+0.1, 0.75000],
@@ -60,7 +60,7 @@ def update_atom_positions(structure, glazer_type):
             else:
                 new_sites.append(site)
 
-    # Вращения для a0b-c-
+    # Вращения для a0b-c- C2/m
     elif glazer_type == "a0b-c-":
         predefined_coords = {
             14: [0.25000+0.1, 0.25000+0.1, 0.75000],
@@ -83,7 +83,7 @@ def update_atom_positions(structure, glazer_type):
             else:
                 new_sites.append(site)
 
-    # Вращения для a0b+c-
+    # Вращения для a0b+c- Cmcm
     elif glazer_type == "a0b+c-":
         predefined_coords = {
             14: [0.25000 + 0.1, 0.25000 + 0.1, 0.75000],
@@ -106,7 +106,7 @@ def update_atom_positions(structure, glazer_type):
             else:
                 new_sites.append(site)
 
-    # Вращения для a0b-b-
+    # Вращения для a0b-b- Imma
     elif glazer_type == "a0b-b-":
         predefined_coords = {
             14: [0.25000+0.1, 0.25000+0.1, 0.75000],
@@ -129,7 +129,7 @@ def update_atom_positions(structure, glazer_type):
             else:
                 new_sites.append(site)
 
-    # Вращения для a+b-b-
+    # Вращения для a+b-b- Pnma
     elif glazer_type == "a+b-b-":
         predefined_coords = {
             14: [0.25000-0.1, 0.25000+0.6, 0.75000-0.05],
@@ -152,7 +152,30 @@ def update_atom_positions(structure, glazer_type):
             else:
                 new_sites.append(site)
 
-    # Вращения для a-a-a-
+    # Вращения для a-b-b- C2/c
+    elif glazer_type == "a-b-b-":
+        predefined_coords = {
+            9: [0.68000, 0.32000, 0.35000],
+            10: [0.82000, 0.18000, 0.65000],
+            11: [0.32000, 0.68000, 0.15000],
+            12: [0.18000, 0.82000, 0.85000],
+            13: [0.18000, 0.18000, 0.15000],
+            14: [0.32000, 0.32000, 0.85000],
+            15: [0.82000, 0.82000, 0.35000],
+            16: [0.68000, 0.68000, 0.65000],
+            17: [-0.20000, 0.50000, 0.00000],
+            18: [0.20000, 0.50000, 0.50000],
+            19: [0.70000, 0.00000, 0.00000],
+            20: [0.30000, 0.00000, 0.50000]
+        }
+        for i, site in enumerate(structure.sites):
+            if i + 1 in predefined_coords:
+                new_coords = predefined_coords[i + 1]
+                new_sites.append(PeriodicSite(site.species, new_coords, structure.lattice))
+            else:
+                new_sites.append(site)
+
+    # Вращения для a-a-a- R-3c
     elif glazer_type == "a-a-a-":
         predefined_coords = {
             9: [0.65000, 0.35000, 0.35000],
