@@ -1,5 +1,5 @@
 # to use the code in the Terminal find the current folder and run:
-# "python fit_results.py data_a_lat.txt"
+# "python Murnaghan_equation_fitting.py a_lat_Murnaghan_equation.txt"
 
 import sys
 import numpy as np
@@ -88,7 +88,7 @@ def fit_and_plot(filename):
 if __name__ == "__main__":
     # parse filename argument
     if len(sys.argv) < 2:
-        print('Command usage: python fit_results.py filename [fig_filename]')
+        print('Command usage: python Murnaghan_equation_fitting.py filename [fig_filename]')
         sys.exit()
     else:
         filename = sys.argv[1]
