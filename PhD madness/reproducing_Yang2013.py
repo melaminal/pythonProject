@@ -41,7 +41,8 @@ plt.xlabel("Misfit strain (%)", fontsize=14)
 plt.ylabel("Energy (eV)", fontsize=14)
 plt.tick_params(axis='both', direction='in', labelsize=12)
 plt.legend()
+plt.grid(True)
 
 # Сохранение графика
-# plt.show()
-plt.savefig("my_plot.png")
+plt.show()
+# plt.savefig("my_plot.png")

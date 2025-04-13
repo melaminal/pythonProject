@@ -18,6 +18,6 @@ def modify_coordinates(file_path, output_path, start_line=9, end_line=28, delta_
     print(f"Файл {output_path} сохранён с изменёнными координатами.")
 
 # Пример использования
-input_file = "/home/dieguez/Desktop/POSCAR"  # Заменить на реальный путь
-output_file = "POSCAR_noise"  # Заменить на реальный путь
+input_file = "путь_к_файлу.txt"  # Заменить на реальный путь
+output_file = "путь_к_измененному_файлу.txt"  # Заменить на реальный путь
 modify_coordinates(input_file, output_file)
