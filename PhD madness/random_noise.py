@@ -1,6 +1,6 @@
 import random
 
-def modify_coordinates(file_path, output_path, start_line=9, end_line=28, delta_range=(-0.1, 0.1)):
+def modify_coordinates(file_path, output_path, start_line=9, end_line=28, delta_range=(-0.02, 0.02)):
     with open(file_path, 'r') as file:
         lines = file.readlines()
 

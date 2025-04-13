@@ -198,13 +198,36 @@ def update_atom_positions(structure, glazer_type):
             else:
                 new_sites.append(site)
 
+    # Вращения для a-b-c- P-1
+    elif glazer_type == "a-b-c-":
+        predefined_coords = {
+            9: [0.65000, 0.35000, 0.32000],
+            10: [0.85000, 0.15000, 0.68000],
+            11: [0.35000, 0.65000, 0.18000],
+            12: [0.15000, 0.85000, 0.82000],
+            13: [0.15000, 0.15000, 0.20000],
+            14: [0.35000, 0.35000, 0.80000],
+            15: [0.85000, 0.85000, 0.30000],
+            16: [0.65000, 0.65000, 0.70000],
+            17: [-0.10000, 0.46000, 0.00000],
+            18: [0.10000, 0.54000, 0.50000],
+            19: [0.60000, 0.04000, 0.00000],
+            20: [0.40000, -0.04000, 0.50000]
+        }
+        for i, site in enumerate(structure.sites):
+            if i + 1 in predefined_coords:
+                new_coords = predefined_coords[i + 1]
+                new_sites.append(PeriodicSite(site.species, new_coords, structure.lattice))
+            else:
+                new_sites.append(site)
+
     else:  # Если вращений нет
         new_sites = structure.sites
 
     return Structure.from_sites(new_sites)
 
 # Пример обработки структуры с вращениями
-glazer_type = "a0b-c-"  # Замените на нужный тип
+glazer_type = "a-b-c-"  # Замените на нужный тип
 updated_structure = update_atom_positions(EuTiO3_structure, glazer_type)
 
 # Анализируем пространственную группу
