@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 
 # Данные (# [ready] - можно анализировать CONTCARs и считать поляризацию)
 x_P4_mmm = [-5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0] # [ready]
@@ -49,7 +50,7 @@ y_I4cm = [-199.05897744 / 4, -199.58371107 / 4, -200.05978548 / 4, -200.46284605
 # y_P1_with_noise = []
 
 # Построение графиков
-plt.figure(figsize=(7, 6))
+plt.figure(figsize=(6, 4))
 plt.plot(x_I4_mcm, y_I4_mcm, color='k', marker='s', markerfacecolor='k',  markeredgecolor='k', markersize=6, label="I4/mcm")
 plt.plot(x_P4mm, y_P4mm, color='#800080', markerfacecolor='#800080',  markeredgecolor='#800080', marker='o', label="P4mm")
 plt.plot(x_Imma, y_Imma, marker='D', color='lightseagreen', markerfacecolor='lightseagreen',  markeredgecolor='lightseagreen', label="Imma")
@@ -61,13 +62,12 @@ plt.plot(x_I4cm , y_I4cm, color='m', markerfacecolor='m',  markeredgecolor='m', 
 # plt.plot(x_P1_with_noise, y_P1_with_noise, marker='', color='', markerfacecolor='',  markeredgecolor='', label="P1_with_noise")
 
 # Настройка графика
-plt.title("Biaxial strain")
-plt.xlabel("Misfit strain (%)", fontsize=14)
-plt.ylabel("Energy (eV)", fontsize=14)
-plt.tick_params(axis='both', direction='in', labelsize=12)
-plt.legend()
-plt.grid(True)
+plt.xlabel("Misfit strain, %", fontsize=14)
+plt.ylabel("Energy per f.u., eV", fontsize=14)
+plt.tick_params(axis='both', direction='in', size=7, labelsize=12)
+plt.legend(frameon=False)
 
 # Сохранение графика
+plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+plt.tight_layout()
 plt.show()
-# plt.savefig("my_plot.png")
