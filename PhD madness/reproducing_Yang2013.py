@@ -34,10 +34,9 @@ y_C2_c = [-199.50159695 / 4, -200.04407379 / 4, -200.46282847 / 4, -200.76589262
 x_C2_m = [-1.00, 0.00, 1.00, 2.00] # [ready]
 y_C2_m = [-201.04907433 / 4, -201.05048870 / 4, -200.99276861 / 4, -200.83551129 / 4]
 
-x_Pmc2_1 = [2.00, 3.00, 4.00, 4.50, 5.00, 5.50, 6.00, 6.50, 7.00, 7.50, 8.00] # [ready]
+x_Pmc2_1 = [2.00, 3.00, 4.00, 4.50, 5.00, 5.50, 6.00, 6.50] # [ready]
 y_Pmc2_1 = [-200.86385159 / 4, -200.69155089 / 4, -200.48792191 / 4, -200.37602462 / 4,
-            -200.25832023 / 4, -200.13527809 / 4, -200.00756597 / 4, -199.87568663 / 4,
-            -199.88278254 / 4, -199.82687388 / 4, -199.77477625 / 4]
+            -200.25832023 / 4, -200.13527809 / 4, -200.00756597 / 4, -199.87568663 / 4]
 
 x_I4cm = [-7.00, -6.00, -5.00, -4.00, -3.00, -2.00] # [ready]
 y_I4cm = [-199.05897744 / 4, -199.58371107 / 4, -200.05978548 / 4, -200.46284605 / 4,
@@ -51,21 +50,21 @@ y_I4cm = [-199.05897744 / 4, -199.58371107 / 4, -200.05978548 / 4, -200.46284605
 
 # Построение графиков
 plt.figure(figsize=(6, 4))
-plt.plot(x_I4_mcm, y_I4_mcm, color='k', marker='s', markerfacecolor='k',  markeredgecolor='k', markersize=6, label="I4/mcm")
-plt.plot(x_P4mm, y_P4mm, color='#800080', markerfacecolor='#800080',  markeredgecolor='#800080', marker='o', label="P4mm")
-plt.plot(x_Imma, y_Imma, marker='D', color='lightseagreen', markerfacecolor='lightseagreen',  markeredgecolor='lightseagreen', label="Imma")
-plt.plot(x_Pnma, y_Pnma, color='#A52A2A', markerfacecolor='#A52A2A',  markeredgecolor='#A52A2A', marker='>', label="Pnma")
-plt.plot(x_C2_c, y_C2_c, marker='^', color='chartreuse', markerfacecolor='chartreuse',  markeredgecolor='chartreuse', label="C2/c")
-plt.plot(x_Pmc2_1, y_Pmc2_1, marker='H', color='olive', markerfacecolor='olive',  markeredgecolor='olive', label="Pmc2_1")
-plt.plot(x_I4cm , y_I4cm, color='m', markerfacecolor='m',  markeredgecolor='m', marker='<', label="I4cm")
-# plt.plot(x_Ima2, y_Ima2, marker='v', color='b', markerfacecolor='b',  markeredgecolor='b', label="Ima2")
-# plt.plot(x_P1_with_noise, y_P1_with_noise, marker='', color='', markerfacecolor='',  markeredgecolor='', label="P1_with_noise")
+plt.plot(x_I4_mcm, y_I4_mcm, color='k', marker='s', markerfacecolor='k',  markeredgecolor='k', markersize=4, label="I4/mcm")
+plt.plot(x_P4mm, y_P4mm, color='#800080', markerfacecolor='#800080',  markeredgecolor='#800080', marker='o', markersize=4, label="P4mm")
+plt.plot(x_Imma, y_Imma, marker='D', color='lightseagreen', markerfacecolor='lightseagreen',  markeredgecolor='lightseagreen', markersize=4, label="Imma")
+plt.plot(x_Pnma, y_Pnma, color='#A52A2A', markerfacecolor='#A52A2A',  markeredgecolor='#A52A2A', marker='>', markersize=4, label="Pnma")
+plt.plot(x_C2_c, y_C2_c, marker='^', color='chartreuse', markerfacecolor='chartreuse',  markeredgecolor='chartreuse', markersize=4, label="C2/c")
+plt.plot(x_Pmc2_1, y_Pmc2_1, marker='H', color='olive', markerfacecolor='olive',  markeredgecolor='olive', markersize=4, label="Pmc2_1")
+plt.plot(x_I4cm , y_I4cm, color='m', markerfacecolor='m',  markeredgecolor='m', marker='<', markersize=4, label="I4cm")
+# plt.plot(x_Ima2, y_Ima2, marker='v', color='b', markerfacecolor='b',  markeredgecolor='b', markersize=4, label="Ima2")
+# plt.plot(x_P1_with_noise, y_P1_with_noise, marker='', color='', markerfacecolor='',  markeredgecolor='', markersize=4, label="P1_with_noise")
 
 # Настройка графика
 plt.xlabel("Misfit strain, %", fontsize=14)
 plt.ylabel("Energy per f.u., eV", fontsize=14)
 plt.tick_params(axis='both', direction='in', size=7, labelsize=12)
-plt.legend(frameon=False)
+legend = plt.legend(frameon=False, loc='upper right', bbox_to_anchor=(0.9, 1.0))  # можно менять числа вручную
 
 # Сохранение графика
 plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
