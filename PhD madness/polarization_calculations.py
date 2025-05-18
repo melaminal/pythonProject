@@ -126,7 +126,7 @@ def minimize_norm(p0, lattice_vectors):
     return best
 
 
-def main(outcar="/home/dieguez/Desktop/BI_ETO_after_P_calc/a0a0c-_or_I4_mcm/102_5_percent/OUTCAR", concar="/home/dieguez/Desktop/BI_ETO_after_P_calc/a0a0c-_or_I4_mcm/102_5_percent/CONTCAR"):
+def main(outcar="/home/dieguez/Desktop/BI_ETO_after_P_calc/P4mm/97_percent/OUTCAR", concar="/home/dieguez/Desktop/BI_ETO_after_P_calc/P4mm/97_percent/CONTCAR"):
     Ω_A3, a_vec, b_vec, c_vec = read_concar(concar)
     p_tot = parse_outcar(outcar)
     p_phys = reduce_to_branch(p_tot, np.vstack([a_vec, b_vec, c_vec]))
