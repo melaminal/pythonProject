@@ -14,7 +14,9 @@ getcontext().prec = 17
 a = Decimal('3.8894989172591279')
 
 # Умножение
-c_new = a * Decimal('1.05')
+c_new = a * Decimal('0.993')
+
+# c_new = Decimal('8.3390856786035705') / Decimal('7.7789978345182558')
 
 # Вывод результата
 print(c_new)
