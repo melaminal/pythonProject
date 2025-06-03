@@ -1,10 +1,31 @@
+import os
 from pymatgen.io.vasp import Poscar
+from pymatgen.io.cif import CifParser
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-poscar = Poscar.from_file("/home/dieguez/Desktop/POSCAR")
-# poscar = Poscar.from_file("C:/Users/Maria/Desktop/POSCAR")
-structure = poscar.structure
 
-sga = SpacegroupAnalyzer(structure, symprec=0.0000001, angle_tolerance=1)
+# Ввод имени файла
+# filename = "C:/Users/Maria/Desktop/structure_Pnma_exact.cif"
+filename = "C:/Users/Maria/Desktop/POSCAR"
+# filename = "/home/dieguez/Desktop/POSCAR"
 
-space_group = sga.get_space_group_symbol()
-print(f"Space group: {space_group}")
+# Определение расширения
+ext = os.path.splitext(filename)[1].lower()
+
+# Считывание структуры в зависимости от формата
+if ext == ".cif":
+    parser = CifParser(filename)
+    structure = parser.get_structures()[0]
+elif ext in [".vasp", ".poscar", ""]:  # иногда POSCAR без расширения
+    poscar = Poscar.from_file(filename)
+    structure = poscar.structure
+else:
+    raise ValueError(f"Неподдерживаемый формат файла: {ext}")
+
+# Анализ симметрии
+# sga = SpacegroupAnalyzer(structure, symprec=1e-7, angle_tolerance=0.01)
+# structure_std = sga.get_conventional_standard_structure(international_monoclinic=True)
+
+# Повторный анализ — без перехода к примитивной ячейке
+sga_std = SpacegroupAnalyzer(structure, symprec=1e-10, angle_tolerance=0.01)
+print("Standard space group:", sga_std.get_space_group_symbol())
+
