@@ -4,7 +4,7 @@ import os
 results = []
 
 # Walk through all subdirectories in the current directory
-for dirname in os.listdir("."):
+for dirname in os.listdir(".."):
     if os.path.isdir(dirname):
         outcar_path = os.path.join(dirname, "OUTCAR")
         if os.path.isfile(outcar_path):

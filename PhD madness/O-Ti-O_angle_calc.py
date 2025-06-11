@@ -25,7 +25,8 @@ def calculate_angle(a, b, c):
     return angle
 
 def main():
-    filename = "/home/dieguez/Desktop/POSCAR"
+    filename = "C:/Users/Maria/Desktop/POSCAR"
+#    filename = "/home/dieguez/Desktop/POSCAR"
     lattice, atoms = read_poscar(filename)
 
     print("Векторы решетки:")

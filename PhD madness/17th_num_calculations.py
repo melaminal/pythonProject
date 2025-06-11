@@ -1,6 +1,5 @@
 from decimal import Decimal, getcontext
-
-from mpmath import sqrtm
+from mpmath import sqrtm, sqrt
 
 # Установить точность до 17 знаков
 getcontext().prec = 17
@@ -14,7 +13,7 @@ getcontext().prec = 17
 a = Decimal('3.8894989172591279')
 
 # Умножение
-c_new = a * Decimal('0.99')
+c_new = a * Decimal('2')
 
 # Вывод результата
 print(c_new)
