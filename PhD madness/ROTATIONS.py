@@ -227,7 +227,7 @@ def update_atom_positions(structure, glazer_type):
     return Structure.from_sites(new_sites)
 
 # Пример обработки структуры с вращениями
-glazer_type = "a-b-c-"  # Замените на нужный тип
+glazer_type = "a0a0c-"  # Замените на нужный тип
 updated_structure = update_atom_positions(EuTiO3_structure, glazer_type)
 
 # Анализируем пространственную группу

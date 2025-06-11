@@ -5,8 +5,8 @@ from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 # Ввод имени файла
 # filename = "C:/Users/Maria/Desktop/structure_Pnma_exact.cif"
-filename = "C:/Users/Maria/Desktop/POSCAR"
-# filename = "/home/dieguez/Desktop/POSCAR"
+# filename = "C:/Users/Maria/Desktop/POSCAR"
+filename = "/home/dieguez/Desktop/POSCAR"
 
 # Определение расширения
 ext = os.path.splitext(filename)[1].lower()
