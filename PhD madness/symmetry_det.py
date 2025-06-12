@@ -5,8 +5,8 @@ from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 # Ввод имени файла
 # filename = "C:/Users/Maria/Desktop/structure_Pnma_exact.cif"
-# filename = "C:/Users/Maria/Desktop/POSCAR"
-filename = "/home/dieguez/Desktop/POSCAR"
+filename = "C:/Users/Maria/Desktop/POSCAR"
+# filename = "/home/dieguez/Desktop/POSCAR"
 
 # Определение расширения
 ext = os.path.splitext(filename)[1].lower()
@@ -22,10 +22,10 @@ else:
     raise ValueError(f"Неподдерживаемый формат файла: {ext}")
 
 # Анализ симметрии
-# sga = SpacegroupAnalyzer(structure, symprec=1e-7, angle_tolerance=0.01)
-# structure_std = sga.get_conventional_standard_structure(international_monoclinic=True)
+sga = SpacegroupAnalyzer(structure, symprec=1e-4, angle_tolerance=1)
+structure_std = sga.get_conventional_standard_structure(international_monoclinic=True)
 
 # Повторный анализ — без перехода к примитивной ячейке
-sga_std = SpacegroupAnalyzer(structure, symprec=1e-10, angle_tolerance=0.01)
+sga_std = SpacegroupAnalyzer(structure, symprec=1e-4, angle_tolerance=1)
 print("Standard space group:", sga_std.get_space_group_symbol())
 
