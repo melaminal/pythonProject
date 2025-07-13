@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 
 # ---------- 1. Чтение POSCAR ----------
-with open("POSCAR_P4mm", "r") as f:
+with open("POSCAR", "r") as f:
     lines = f.readlines()
 
 title = lines[0].strip()

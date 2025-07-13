@@ -14,7 +14,7 @@ ext = os.path.splitext(filename)[1].lower()
 # Считывание структуры в зависимости от формата
 if ext == ".cif":
     parser = CifParser(filename)
-    structure = parser.get_structures()[0]
+    structure = parser.get_structures(z)[0]
 elif ext in [".vasp", ".poscar", ""]:  # иногда POSCAR без расширения
     poscar = Poscar.from_file(filename)
     structure = poscar.structure

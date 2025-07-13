@@ -1,6 +1,6 @@
 import random
 
-def modify_coordinates(file_path, output_path, start_line=9, end_line=28, delta_range=(-0.02, 0.02)):
+def modify_coordinates(file_path, output_path, start_line=9, end_line=48, delta_range=(-0.02, 0.02)):
     with open(file_path, 'r') as file:
         lines = file.readlines()
 
@@ -18,6 +18,6 @@ def modify_coordinates(file_path, output_path, start_line=9, end_line=28, delta_
     print(f"Файл {output_path} сохранён с изменёнными координатами.")
 
 # Пример использования
-input_file = "/home/dieguez/Desktop/POSCAR"  # Заменить на реальный путь
-output_file = "/home/dieguez/Desktop/POSCAR_with_noise"  # Заменить на реальный путь
+input_file = "POSCAR_40atoms"  # Заменить на реальный путь
+output_file = "POSCAR_40_atoms_with_noise"  # Заменить на реальный путь
 modify_coordinates(input_file, output_file)

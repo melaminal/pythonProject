@@ -3,8 +3,20 @@ from pymatgen.io.vasp import Poscar
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 import pandas as pd
 
+# symprec (симметрийная точность). Числовая погрешность (в Å) при сравнении атомных координат для определения симметрии.
+# Чем меньше значение, тем жёстче критерий:
+# 1e-3 — грубо (можно принять слегка искажённую структуру как высокосимметричную),
+# 1e-5 — обычно разумно,
+# 1e-7 — строго (хорошо для идеально релаксированных DFT-структур).
 
-def analyze_symmetries(root_dir, symprec=1e-7, angle_tolerance=1):
+# angle_tolerance
+# Угловая погрешность (в градусах) при определении симметрии: насколько отклонение углов от идеала (например, 90° или 120°)
+# всё ещё считается допустимым. Чем меньше значение, тем жёстче критерий.
+# angle_tolerance = 0.1 → только 90.0 ± 0.1° принимается как прямой угол;
+# angle_tolerance = 1.0 → уже 89.0–91.0° допускается, можно «прощать» искажения.
+
+# критерии симметрии выбраны по степени точности экспериментальных данных, обычно не превышающей 5 знаков после (.)
+def analyze_symmetries(root_dir, symprec=1e-5, angle_tolerance=1):
     results = []
 
     # Получаем список поддиректорий первого уровня
@@ -31,4 +43,4 @@ def analyze_symmetries(root_dir, symprec=1e-7, angle_tolerance=1):
 
 
 # Пример вызова
-analyze_symmetries("/home/dieguez/Desktop/BI_ETO_after_P_calc/P4mm")
+analyze_symmetries("/home/mariia/EuTiO3/symmetry_det/BI/Pm-3m")
